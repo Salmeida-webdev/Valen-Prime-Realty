@@ -10,16 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const revealElements = document.querySelectorAll(".reveal-on-scroll");
   const hudLines = document.querySelectorAll(".hud-line");
 
-  /* ==========================================================
-     MOBILE MENU
-     ========================================================== */
-
   const closeMobileMenu = () => {
     if (!menuToggle || !mobileMenu) return;
 
     menuToggle.classList.remove("is-active");
     mobileMenu.classList.remove("is-open");
-
     body.classList.remove("menu-open");
 
     menuToggle.setAttribute("aria-expanded", "false");
@@ -32,30 +27,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const isOpen = mobileMenu.classList.toggle("is-open");
 
     menuToggle.classList.toggle("is-active", isOpen);
-
     body.classList.toggle("menu-open", isOpen);
 
     menuToggle.setAttribute("aria-expanded", String(isOpen));
-
     menuToggle.setAttribute(
       "aria-label",
       isOpen ? "Fechar menu" : "Abrir menu",
     );
   };
 
-  /* ==========================================================
-     HEADER SCROLL
-     ========================================================== */
-
   const updateHeader = () => {
     if (!header) return;
-
     header.classList.toggle("is-scrolled", window.scrollY > 24);
   };
-
-  /* ==========================================================
-     PRELOADER
-     ========================================================== */
 
   const hidePreloader = () => {
     if (!preloader) return;
@@ -65,10 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 350);
   };
 
-  /* ==========================================================
-     REVEAL ANIMATIONS
-     ========================================================== */
-
   const setupRevealAnimation = () => {
     if (!revealElements.length) return;
 
@@ -76,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
       revealElements.forEach((element) => {
         element.classList.add("is-visible");
       });
-
       return;
     }
 
@@ -86,12 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!entry.isIntersecting) return;
 
           entry.target.classList.add("is-visible");
-
           observer.unobserve(entry.target);
         });
       },
       {
-        root: null,
         threshold: 0.12,
         rootMargin: "0px 0px -60px 0px",
       },
@@ -101,10 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
       revealObserver.observe(element);
     });
   };
-
-  /* ==========================================================
-     SMOOTH SCROLL
-     ========================================================== */
 
   const setupSmoothAnchors = () => {
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
@@ -116,11 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!targetId || targetId === "#") return;
 
         const targetElement = document.querySelector(targetId);
-
         if (!targetElement) return;
 
         event.preventDefault();
-
         closeMobileMenu();
 
         targetElement.scrollIntoView({
@@ -131,21 +102,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ==========================================================
-     ACTIVE NAVIGATION
-     ========================================================== */
-
   const setupActiveNavigation = () => {
     const sections = document.querySelectorAll("section[id]");
     const navLinks = document.querySelectorAll(".site-nav__link");
 
-    if (
-      !sections.length ||
-      !navLinks.length ||
-      !("IntersectionObserver" in window)
-    ) {
-      return;
-    }
+    if (!sections.length || !navLinks.length) return;
 
     const activeObserver = new IntersectionObserver(
       (entries) => {
@@ -156,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
           navLinks.forEach((link) => {
             const href = link.getAttribute("href") || "";
-
             const isSameSection =
               href === `#${currentId}` || href.endsWith(`#${currentId}`);
 
@@ -165,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       },
       {
-        root: null,
         threshold: 0.42,
       },
     );
@@ -175,19 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ==========================================================
-     PREMIUM GALLERY LIGHTBOX
-     ========================================================== */
-
   const setupGalleryLightbox = () => {
     const galleryImages = document.querySelectorAll(".gallery-item img");
 
     if (!galleryImages.length) return;
 
     const lightbox = document.createElement("div");
-
     lightbox.className = "gallery-lightbox";
-
     lightbox.setAttribute("aria-hidden", "true");
 
     lightbox.innerHTML = `
@@ -196,12 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         type="button"
         aria-label="Fechar galeria"
       >
-        <img
-          src="assets/icons/icon-close.svg"
-          alt=""
-          width="24"
-          height="24"
-        >
+        ✕
       </button>
 
       <img
@@ -214,28 +162,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(lightbox);
 
     const lightboxImage = lightbox.querySelector(".gallery-lightbox__image");
-
     const closeButton = lightbox.querySelector(".gallery-lightbox__close");
 
     const openLightbox = (image) => {
       if (!lightboxImage) return;
 
       lightboxImage.src = image.currentSrc || image.src;
-
       lightboxImage.alt = image.alt || "Imagem da galeria";
 
       lightbox.classList.add("is-open");
-
       lightbox.setAttribute("aria-hidden", "false");
-
       body.classList.add("menu-open");
     };
 
     const closeLightbox = () => {
       lightbox.classList.remove("is-open");
-
       lightbox.setAttribute("aria-hidden", "true");
-
       body.classList.remove("menu-open");
 
       if (lightboxImage) {
@@ -252,9 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    if (closeButton) {
-      closeButton.addEventListener("click", closeLightbox);
-    }
+    closeButton?.addEventListener("click", closeLightbox);
 
     lightbox.addEventListener("click", (event) => {
       if (event.target === lightbox) {
@@ -269,10 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ==========================================================
-     HUD PARALLAX EFFECT
-     ========================================================== */
-
   const setupHudMotion = () => {
     if (!hudLines.length) return;
 
@@ -280,28 +216,17 @@ document.addEventListener("DOMContentLoaded", () => {
       "mousemove",
       (event) => {
         const x = (event.clientX / window.innerWidth - 0.5) * 8;
-
         const y = (event.clientY / window.innerHeight - 0.5) * 8;
 
         hudLines.forEach((line, index) => {
           const depth = (index + 1) * 0.4;
 
-          line.style.transform = `
-            translate3d(
-              ${x * depth}px,
-              ${y * depth}px,
-              0
-            )
-          `;
+          line.style.transform = `translate3d(${x * depth}px, ${y * depth}px, 0)`;
         });
       },
       { passive: true },
     );
   };
-
-  /* ==========================================================
-     BUTTON MICRO INTERACTIONS
-     ========================================================== */
 
   const setupButtonEffects = () => {
     const buttons = document.querySelectorAll(".btn");
@@ -317,10 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ==========================================================
-     TECH STATUS BADGES
-     ========================================================== */
-
   const setupTechBadges = () => {
     const badges = document.querySelectorAll(
       ".property-card__tag, .eyebrow, .section-kicker",
@@ -330,10 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
       badge.setAttribute("data-status", "online");
     });
   };
-
-  /* ==========================================================
-     CURATION FORM
-     ========================================================== */
 
   const setupCurationForm = () => {
     const form = document.querySelector(".curation-card");
@@ -354,13 +271,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ==========================================================
-     EVENTS
-     ========================================================== */
+  const setupStaggerAnimations = () => {
+    const staggerGroups = document.querySelectorAll(
+      ".properties__grid, .tech-grid, .engineering-grid, .advisors__grid, .testimonials__grid, .specs-grid, .amenities-grid",
+    );
 
-  if (menuToggle) {
-    menuToggle.addEventListener("click", toggleMobileMenu);
-  }
+    staggerGroups.forEach((group) => {
+      const items = group.querySelectorAll(".reveal-on-scroll");
+
+      items.forEach((item, index) => {
+        item.style.transitionDelay = `${Math.min(index * 70, 420)}ms`;
+      });
+    });
+  };
+
+  const setupHeroParallax = () => {
+    const heroMedia = document.querySelector(".hero__media img");
+
+    if (!heroMedia) return;
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        const offset = window.scrollY * 0.12;
+        heroMedia.style.transform = `translateY(${offset}px) scale(1.04)`;
+      },
+      { passive: true },
+    );
+  };
+
+  const setupScanlineEffect = () => {
+    const cards = document.querySelectorAll(
+      ".tech-card, .engineering-card, .property-card, .spec-card, .amenity-card, .feature-item",
+    );
+
+    cards.forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        card.classList.add("is-scanning");
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.classList.remove("is-scanning");
+      });
+    });
+  };
+
+  /*
+    IMPORTANTE:
+    A lógica antiga de links dinâmicos foi removida.
+    Agora cada imóvel tem sua própria página HTML:
+    aurum-residence.html
+    horizon-ocean.html
+    infinity-residence.html
+    maison-bellevue.html
+    montblanc-house.html
+    skyline-premium.html
+  */
+
+  menuToggle?.addEventListener("click", toggleMobileMenu);
 
   mobileLinks.forEach((link) => {
     link.addEventListener("click", closeMobileMenu);
@@ -380,27 +348,16 @@ document.addEventListener("DOMContentLoaded", () => {
     once: true,
   });
 
-  /* ==========================================================
-     INIT
-     ========================================================== */
-
   updateHeader();
-
   setupRevealAnimation();
-
   setupSmoothAnchors();
-
   setupActiveNavigation();
-
   setupGalleryLightbox();
-
   setupHudMotion();
-
   setupButtonEffects();
-
   setupTechBadges();
-
   setupCurationForm();
-
-  setTimeout(hidePreloader, 1600);
+  setupStaggerAnimations();
+  setupHeroParallax();
+  setupScanlineEffect();
 });
