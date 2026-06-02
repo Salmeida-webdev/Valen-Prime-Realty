@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const mobileLinks = document.querySelectorAll(".mobile-menu__link");
   const revealElements = document.querySelectorAll(".reveal-on-scroll");
   const hudLines = document.querySelectorAll(".hud-line");
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
 
   const closeMobileMenu = () => {
     if (!menuToggle || !mobileMenu) return;
@@ -44,18 +47,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const hidePreloader = () => {
     if (!preloader) return;
 
-    setTimeout(() => {
-      preloader.classList.add("is-hidden");
-    }, 350);
+    setTimeout(
+      () => {
+        preloader.classList.add("is-hidden");
+      },
+      reduceMotion ? 0 : 280,
+    );
   };
 
   const setupRevealAnimation = () => {
     if (!revealElements.length) return;
 
-    if (!("IntersectionObserver" in window)) {
+    if (reduceMotion || !("IntersectionObserver" in window)) {
       revealElements.forEach((element) => {
         element.classList.add("is-visible");
       });
+
       return;
     }
 
@@ -89,13 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!targetId || targetId === "#") return;
 
         const targetElement = document.querySelector(targetId);
+
         if (!targetElement) return;
 
         event.preventDefault();
+
         closeMobileMenu();
 
         targetElement.scrollIntoView({
-          behavior: "smooth",
+          behavior: reduceMotion ? "auto" : "smooth",
           block: "start",
         });
       });
@@ -106,7 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const sections = document.querySelectorAll("section[id]");
     const navLinks = document.querySelectorAll(".site-nav__link");
 
-    if (!sections.length || !navLinks.length) return;
+    if (
+      !sections.length ||
+      !navLinks.length ||
+      !("IntersectionObserver" in window)
+    )
+      return;
 
     const activeObserver = new IntersectionObserver(
       (entries) => {
@@ -117,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           navLinks.forEach((link) => {
             const href = link.getAttribute("href") || "";
+
             const isSameSection =
               href === `#${currentId}` || href.endsWith(`#${currentId}`);
 
@@ -140,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!galleryImages.length) return;
 
     const lightbox = document.createElement("div");
+
     lightbox.className = "gallery-lightbox";
     lightbox.setAttribute("aria-hidden", "true");
 
@@ -162,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(lightbox);
 
     const lightboxImage = lightbox.querySelector(".gallery-lightbox__image");
+
     const closeButton = lightbox.querySelector(".gallery-lightbox__close");
 
     const openLightbox = (image) => {
@@ -172,12 +189,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       lightbox.classList.add("is-open");
       lightbox.setAttribute("aria-hidden", "false");
+
       body.classList.add("menu-open");
+
+      closeButton?.focus({
+        preventScroll: true,
+      });
     };
 
     const closeLightbox = () => {
       lightbox.classList.remove("is-open");
       lightbox.setAttribute("aria-hidden", "true");
+
       body.classList.remove("menu-open");
 
       if (lightboxImage) {
@@ -210,36 +233,27 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const setupHudMotion = () => {
-    if (!hudLines.length) return;
+    if (!hudLines.length || reduceMotion) return;
 
     window.addEventListener(
       "mousemove",
       (event) => {
         const x = (event.clientX / window.innerWidth - 0.5) * 8;
+
         const y = (event.clientY / window.innerHeight - 0.5) * 8;
 
         hudLines.forEach((line, index) => {
           const depth = (index + 1) * 0.4;
 
-          line.style.transform = `translate3d(${x * depth}px, ${y * depth}px, 0)`;
+          line.style.transform = `translate3d(${
+            x * depth
+          }px, ${y * depth}px, 0)`;
         });
       },
-      { passive: true },
+      {
+        passive: true,
+      },
     );
-  };
-
-  const setupButtonEffects = () => {
-    const buttons = document.querySelectorAll(".btn");
-
-    buttons.forEach((button) => {
-      button.addEventListener("mouseenter", () => {
-        button.style.transform = "translateY(-2px)";
-      });
-
-      button.addEventListener("mouseleave", () => {
-        button.style.transform = "";
-      });
-    });
   };
 
   const setupTechBadges = () => {
@@ -264,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (propertiesSection) {
         propertiesSection.scrollIntoView({
-          behavior: "smooth",
+          behavior: reduceMotion ? "auto" : "smooth",
           block: "start",
         });
       }
@@ -272,6 +286,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const setupStaggerAnimations = () => {
+    if (reduceMotion) return;
+
     const staggerGroups = document.querySelectorAll(
       ".properties__grid, .tech-grid, .engineering-grid, .advisors__grid, .testimonials__grid, .specs-grid, .amenities-grid",
     );
@@ -288,15 +304,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const setupHeroParallax = () => {
     const heroMedia = document.querySelector(".hero__media img");
 
-    if (!heroMedia) return;
+    if (!heroMedia || reduceMotion) return;
 
     window.addEventListener(
       "scroll",
       () => {
-        const offset = window.scrollY * 0.12;
+        const offset = Math.min(window.scrollY * 0.1, 90);
+
         heroMedia.style.transform = `translateY(${offset}px) scale(1.04)`;
       },
-      { passive: true },
+      {
+        passive: true,
+      },
     );
   };
 
@@ -316,17 +335,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /*
-    IMPORTANTE:
-    A lógica antiga de links dinâmicos foi removida.
-    Agora cada imóvel tem sua própria página HTML:
-    aurum-residence.html
-    horizon-ocean.html
-    infinity-residence.html
-    maison-bellevue.html
-    montblanc-house.html
-    skyline-premium.html
-  */
+  const setupPrefetchOnIntent = () => {
+    const links = document.querySelectorAll('a[href$=".html"]');
+
+    const prefetched = new Set();
+
+    const prefetch = (href) => {
+      if (!href || prefetched.has(href)) return;
+
+      const link = document.createElement("link");
+
+      link.rel = "prefetch";
+      link.href = href;
+
+      document.head.appendChild(link);
+
+      prefetched.add(href);
+    };
+
+    links.forEach((link) => {
+      const href = link.getAttribute("href");
+
+      link.addEventListener("mouseenter", () => prefetch(href), {
+        once: true,
+      });
+
+      link.addEventListener("focus", () => prefetch(href), {
+        once: true,
+      });
+    });
+  };
 
   menuToggle?.addEventListener("click", toggleMobileMenu);
 
@@ -349,15 +387,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   updateHeader();
+
   setupRevealAnimation();
   setupSmoothAnchors();
   setupActiveNavigation();
   setupGalleryLightbox();
   setupHudMotion();
-  setupButtonEffects();
   setupTechBadges();
   setupCurationForm();
   setupStaggerAnimations();
   setupHeroParallax();
   setupScanlineEffect();
+  setupPrefetchOnIntent();
 });
